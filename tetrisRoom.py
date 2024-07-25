@@ -9,6 +9,7 @@ import time
 
 w, h = [7, 7]
 p1, p2, p3, p4, p5, p6, p7 = [649, 1869, 2289, 3507, 5423, 6687, 7926]
+min_piece_price = min(p1, p2, p3, p4, p5, p6, p7)
 room_input = ['#######',
               '#.....#',
               '#.....#',
@@ -19,6 +20,7 @@ room_input = ['#######',
 min_cost = np.inf
 pos_list = []
 pieces_used = ['', 0]
+node_counter = 0
 
 def input_to_tab(r_input: list[str]):
     room = []
@@ -226,11 +228,21 @@ def still_solvable(room:list[list[int]]):
                         visited.append(ele)
     return True
 
+def fun_nb_pieces_to_solve(room:list[list[int]]):
+    res = 0
+    for line in room:
+        res += line.count(0)
+    return int(res/4)
+
+nb_pieces_to_solve = fun_nb_pieces_to_solve(room_tab)
+
 def parcours(node:Node, depth:int=0):
     global min_cost
     global pos_list
     global pieces_used
+    #global node_counter #debug
     if not node.position in pos_list:
+        #node_counter += 1 #debug
         leg_places = legal_places(node.room)
         if is_full(node.room):
             pos_list.append(node.position)
@@ -243,7 +255,7 @@ def parcours(node:Node, depth:int=0):
                 pieces_used[1] = 1
         elif still_solvable(node.room) and len(leg_places) > 0 :
             for (coord, piece, rot) in leg_places:
-                if node.cost + piece['price'] <= min_cost:
+                if node.cost + piece['price'] + (nb_pieces_to_solve - depth - 1)*min_piece_price <= min_cost:
                     new_room = copy.deepcopy(node.room)
                     place(new_room, coord, piece, rot)
                     new_node = Node(new_room, piece, node.cost + piece['price'], copy.deepcopy(node.position))
@@ -261,3 +273,4 @@ def pavages(room:list[list[int]]):
     return (min_cost/100, pieces_used[0], pieces_used[1])
 
 print(pavages(room_tab))
+print(len(pos_list))
