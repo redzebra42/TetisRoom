@@ -7,7 +7,7 @@ import numpy as np
 # the standard input according to the problem statement.
 
 w, h = [7, 7]
-p1, p2, p3, p4, p5, p6, p7 = [6.49, 18.69, 22.89, 35.07, 54.23, 66.87, 79.26]
+p1, p2, p3, p4, p5, p6, p7 = [649, 1869, 2289, 3507, 5423, 6687, 7926]
 room_input = ['#######',
               '#.....#',
               '#.....#',
@@ -15,6 +15,8 @@ room_input = ['#######',
               '#.....#',
               '#.....#',
               '#######']
+min_cost = np.inf
+pos_list = []
 
 def input_to_tab(r_input: list[str]):
     room = []
@@ -111,12 +113,13 @@ def pieces():
 
 class Node:
 
-    def __init__(self, room=room_tab, piece=None, cost=0) -> None:
+    def __init__(self, room=room_tab, piece=None, cost=0, position={}) -> None:
         self.parent = None
         self.child = []
         self.room = room
         self.piece = piece
         self.cost = cost
+        self.position = position
 
 def legal_places(room:list[list[int]]):
     leg_places = []
@@ -221,30 +224,34 @@ def still_solvable(room:list[list[int]]):
                         visited.append(ele)
     return True
 
-def parcours(node:Node, min_cost=np.inf, res:list=[]):
+def parcours(node:Node, res:list=[], depth:int=0):
     #TODO pas prendre compte de l'ordre, pour l'instant les memes pavages mis dans des oredre differents marchent...
+    global min_cost
+    global pos_list
     leg_places = legal_places(node.room)
     if is_full(node.room): 
         if node.cost == min_cost:
             res.append(nb_pieces(node))
         elif node.cost < min_cost:
             min_cost = node.cost
+            print(min_cost)
             res = [nb_pieces(node)]
-    elif still_solvable(node.room) and len(leg_places) != 0 :
+    elif not (node.position in pos_list) and still_solvable(node.room) and len(leg_places) > 0 :
         for (coord, piece, rot) in leg_places:
             if node.cost + piece['price'] <= min_cost:
                 new_room = copy.deepcopy(node.room)
                 place(new_room, coord, piece, rot)
-                new_node = Node(new_room, piece, node.cost + piece['price'])
+                new_node = Node(new_room, piece, node.cost + piece['price'], copy.deepcopy(node.position))
                 new_node.parent = node
+                new_node.position[coord] = (piece, rot)
+                pos_list.append(new_node.position)
                 node.child.append(new_node)
-                parcours(new_node, min_cost, res)
-            
+                parcours(new_node, res, depth+1)
+
 def pavages(room:list[list[int]]):
     node = Node(room, None, 0)
-    cost = np.inf
     res = []
-    parcours(node, cost, res)
-    return (cost, len(res), res[0])
+    parcours(node, res)
+    return (min_cost, len(res), res[0])
 
 print(pavages(room_tab))
