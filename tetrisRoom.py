@@ -115,6 +115,8 @@ def place(room:list, coord:tuple, piece:dict, rot:int):
 def pieces():
     return sorted([o, i, t, l, j, z, s], key=lambda piece: piece['price'])
 
+sorted_pieces = pieces()
+
 class Node:
 
     def __init__(self, room=room_tab, piece=None, cost=0, position={}) -> None:
@@ -127,7 +129,7 @@ class Node:
 
 def legal_places(room:list):
     leg_places = []
-    for piece in pieces():
+    for piece in sorted_pieces:
         for rot in range(len(piece.keys()) - 1):
             for i in range(h):
                 for j in range(w):
@@ -236,13 +238,20 @@ def fun_nb_pieces_to_solve(room:list):
 
 nb_pieces_to_solve = fun_nb_pieces_to_solve(room_tab)
 
+def update_sorted_pieces(cost):
+    global sorted_pieces
+    for i in range(1, len(sorted_pieces)):
+        if (nb_pieces_to_solve-1)*min_piece_price + sorted_pieces[i]['price'] > cost:
+            sorted_pieces = sorted_pieces[:i]
+            break
+
 def parcours(node:Node, depth:int=0):
     global min_cost
     global pos_list
     global pieces_used
-    #global node_counter #debug
+    global node_counter #debug
     if not node.position in pos_list:
-        #node_counter += 1 #debug
+        node_counter += 1 #debug
         leg_places = legal_places(node.room)
         if is_full(node.room):
             pos_list.append(node.position)
@@ -250,8 +259,9 @@ def parcours(node:Node, depth:int=0):
                 pieces_used[1] += 1
             elif node.cost < min_cost:
                 min_cost = node.cost
+                update_sorted_pieces(min_cost)
                 print('minimal_cost: ', min_cost)
-                #print('visited nodes: ', node_counter)
+                print('visited nodes: ', node_counter)
                 pieces_used[0] = nb_pieces(node)
                 pieces_used[1] = 1
         elif still_solvable(node.room) and len(leg_places) > 0 :
