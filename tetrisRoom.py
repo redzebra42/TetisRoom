@@ -250,10 +250,11 @@ def parcours(node:Node, depth:int=0):
     global pos_list
     global pieces_used
     global node_counter #debug
+    #clock = time.clock_gettime(0)
     if not node.position in pos_list:
-        node_counter += 1 #debug
-        leg_places = legal_places(node.room)
+        #node_counter += 1 #debug
         if is_full(node.room):
+            #print(time.clock_gettime(0) - clock)
             pos_list.append(node.position)
             if node.cost == min_cost:
                 pieces_used[1] += 1
@@ -261,20 +262,22 @@ def parcours(node:Node, depth:int=0):
                 min_cost = node.cost
                 update_sorted_pieces(min_cost)
                 print('minimal_cost: ', min_cost)
-                print('visited nodes: ', node_counter)
+                #print('visited nodes: ', node_counter)
                 pieces_used[0] = nb_pieces(node)
                 pieces_used[1] = 1
-        elif still_solvable(node.room) and len(leg_places) > 0 :
-            for (coord, piece, rot) in leg_places:
-                if node.cost + piece['price'] + (nb_pieces_to_solve - depth - 1)*min_piece_price <= min_cost:
-                    new_room = copy.deepcopy(node.room)
-                    place(new_room, coord, piece, rot)
-                    new_node = Node(new_room, piece, node.cost + piece['price'], copy.deepcopy(node.position))
-                    new_node.parent = node
-                    new_node.position[coord] = (piece, rot)
-                    node.child.append(new_node)
-                    parcours(new_node, depth+1)
-            pos_list.append(node.position)
+        elif still_solvable(node.room):
+            leg_places = legal_places(node.room)
+            if len(leg_places) > 0 :
+                for (coord, piece, rot) in leg_places:
+                    if node.cost + piece['price'] + (nb_pieces_to_solve - depth - 1)*min_piece_price <= min_cost:
+                        new_room = copy.deepcopy(node.room)
+                        place(new_room, coord, piece, rot)
+                        new_node = Node(new_room, piece, node.cost + piece['price'], copy.deepcopy(node.position))
+                        new_node.parent = node
+                        new_node.position[coord] = (piece, rot)
+                        node.child.append(new_node)
+                        parcours(new_node, depth+1)
+                pos_list.append(node.position)
 
 def pavages(room:list):
     clock = time.time()
