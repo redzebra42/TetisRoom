@@ -22,7 +22,7 @@ pos_list = []
 pieces_used = ['', 0]
 node_counter = 0
 
-def input_to_tab(r_input: list[str]):
+def input_to_tab(r_input:list):
     room = []
     for line in r_input:
         row = []
@@ -93,7 +93,7 @@ s = {'price': p7,
 
 room_tab = input_to_tab(room_input)
 
-def fit(room:list[list[int]], coord:tuple[int, int], piece:dict, rot:int):
+def fit(room:list, coord:tuple, piece:dict, rot:int):
     '''checks if piece[rot] fits in room at coord'''
     if coord[0]+ len(piece[rot]) > h or coord[1]+ len(piece[rot][0]) > w:
         return False
@@ -104,7 +104,7 @@ def fit(room:list[list[int]], coord:tuple[int, int], piece:dict, rot:int):
                     return False
         return True
 
-def place(room:list[list[int]], coord:tuple[int, int], piece:dict, rot:int):
+def place(room:list, coord:tuple, piece:dict, rot:int):
     '''modifies room to place piece[rot] at coord without checking if it fits and returns price'''
     for i in range(len(piece[rot])):
         for j in range(len(piece[rot][i])):
@@ -125,7 +125,7 @@ class Node:
         self.cost = cost
         self.position = position
 
-def legal_places(room:list[list[int]]):
+def legal_places(room:list):
     leg_places = []
     for piece in pieces():
         for rot in range(len(piece.keys()) - 1):
@@ -135,7 +135,7 @@ def legal_places(room:list[list[int]]):
                         leg_places.append(((i, j), piece, rot))
     return leg_places
 
-def is_full(room:list[list[int]]):
+def is_full(room:list):
     for line in room:
         for ele in line:
             if ele == 0:
@@ -167,7 +167,7 @@ def nb_pieces(node:Node):
         str_res += str(num) + ' '
     return str_res
 
-def neighbours(coord:tuple[int,int]):
+def neighbours(coord:tuple):
     '''Returns an array of neighbouring coordinates, of length 2 to 4.'''
     if coord[0] == 0:
         if coord[1] == 0:
@@ -214,7 +214,7 @@ def group(room, coord):
     else:
         raise RuntimeError #group should only be called on 0
 
-def still_solvable(room:list[list[int]]):
+def still_solvable(room:list):
     '''returns if every 0 group has a size divisible by 4'''
     visited = []
     for i in range(h):
@@ -228,7 +228,7 @@ def still_solvable(room:list[list[int]]):
                         visited.append(ele)
     return True
 
-def fun_nb_pieces_to_solve(room:list[list[int]]):
+def fun_nb_pieces_to_solve(room:list):
     res = 0
     for line in room:
         res += line.count(0)
@@ -250,7 +250,8 @@ def parcours(node:Node, depth:int=0):
                 pieces_used[1] += 1
             elif node.cost < min_cost:
                 min_cost = node.cost
-                print(min_cost)
+                print('minimal_cost: ', min_cost)
+                #print('visited nodes: ', node_counter)
                 pieces_used[0] = nb_pieces(node)
                 pieces_used[1] = 1
         elif still_solvable(node.room) and len(leg_places) > 0 :
@@ -265,7 +266,7 @@ def parcours(node:Node, depth:int=0):
                     parcours(new_node, depth+1)
             pos_list.append(node.position)
 
-def pavages(room:list[list[int]]):
+def pavages(room:list):
     clock = time.time()
     node = Node(room, None, 0)
     parcours(node)
@@ -273,4 +274,4 @@ def pavages(room:list[list[int]]):
     return (min_cost/100, pieces_used[0], pieces_used[1])
 
 print(pavages(room_tab))
-print(len(pos_list))
+print(len(pos_list), node_counter)
