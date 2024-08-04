@@ -8,7 +8,8 @@ import time
 # the standard input according to the problem statement.
 
 w, h = [7, 7]
-p1, p2, p3, p4, p5, p6, p7 = [649, 1869, 2289, 3507, 5423, 6687, 7926]
+#p1, p2, p3, p4, p5, p6, p7 = [649, 1869, 2289, 3507, 5423, 6687, 7926]
+p1, p2, p3, p4, p5, p6, p7 = [1725, 1413, 7237, 7556, 8364, 4280, 1746]
 min_piece_price = min(p1, p2, p3, p4, p5, p6, p7)
 room_input = ['#######',
               '#.....#',
@@ -252,7 +253,7 @@ def parcours(node:Node, depth:int=0):
     global node_counter #debug
     #clock = time.clock_gettime(0)
     if not node.position in pos_list:
-        #node_counter += 1 #debug
+        node_counter += 1 #debug
         if is_full(node.room):
             #print(time.clock_gettime(0) - clock)
             pos_list.append(node.position)
@@ -262,7 +263,7 @@ def parcours(node:Node, depth:int=0):
                 min_cost = node.cost
                 update_sorted_pieces(min_cost)
                 print('minimal_cost: ', min_cost)
-                #print('visited nodes: ', node_counter)
+                print('visited nodes: ', node_counter)
                 pieces_used[0] = nb_pieces(node)
                 pieces_used[1] = 1
         elif still_solvable(node.room):
@@ -286,5 +287,11 @@ def pavages(room:list):
     print('time: ', time.time() - clock)
     return (min_cost/100, pieces_used[0], pieces_used[1])
 
-print(pavages(room_tab))
+#print(pavages(room_tab))
+
+
+pavage = pavages(room_tab)
 print(len(pos_list), node_counter)
+print(pavage[0])
+print(pavage[1])
+print(pavage[2])
